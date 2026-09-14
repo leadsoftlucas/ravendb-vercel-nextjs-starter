@@ -1,0 +1,63 @@
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.back {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.jobTitle {
+  color: var(--muted);
+  margin: 0;
+}
+
+.section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.3rem;
+  background: var(--card);
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+.notes {
+  line-height: 1.6;
+  margin: 0;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.metaLabel {
+  color: var(--muted);
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
