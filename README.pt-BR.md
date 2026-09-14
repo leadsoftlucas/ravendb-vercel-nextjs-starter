@@ -112,6 +112,9 @@ serverless](https://ravendb.net/articles/using-ravendb-from-serverless-applicati
 5. Converta o certificado para base64 — você vai colar essa string única na Vercel, não o
    arquivo em si:
 
+   <details>
+   <summary>Comando base64 (macOS/Linux ou Windows PowerShell)</summary>
+
    ```bash
    # macOS / Linux
    base64 -i seu-certificado.pfx | tr -d '\n'
@@ -121,6 +124,8 @@ serverless](https://ravendb.net/articles/using-ravendb-from-serverless-applicati
    # Windows PowerShell
    [Convert]::ToBase64String([IO.File]::ReadAllBytes("seu-certificado.pfx"))
    ```
+
+   </details>
 
 Veja o guia oficial para mais detalhes: [Connecting a Node.js application to RavenDB
 Cloud](https://ravendb.net/articles/connecting-node-js-application-to-ravendb-cloud).
