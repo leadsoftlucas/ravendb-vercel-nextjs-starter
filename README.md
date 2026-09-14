@@ -29,6 +29,7 @@ run and no data to import. Clone, deploy, connect, done.
 - **Framework:** Next.js 16 (App Router) + TypeScript
 - **Database:** [RavenDB Cloud](https://ravendb.net/cloud) via the official [`ravendb`](https://www.npmjs.com/package/ravendb) npm client
 - **Search:** RavenDB's built-in full-text search (Lucene-backed auto-indexes) — no separate search service
+- **AI:** an optional [AI Agents](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview) chat demo (`/assistant`) — RavenDB's native, auditable agent framework, not an external orchestration service
 - **Hosting:** [Vercel](https://vercel.com), one-click deploy
 
 ## Why RavenDB + Next.js
@@ -94,6 +95,32 @@ caches a single instance on `globalThis` so it survives Next.js dev-server hot r
 reused across warm serverless invocations on Vercel, per RavenDB's own guidance for [using
 RavenDB from serverless applications](https://ravendb.net/articles/using-ravendb-from-serverless-applications).
 
+### AI Agents demo (optional)
+
+The `/assistant` page is a small chat over the same `Employees` data, answered by a RavenDB
+[**AI Agent**](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview)
+— a database-native agent framework, not a separate AI service you wire up yourself. The agent
+is configured with one read-only **query tool** over the `Employees` collection
+(`src/server/infrastructure/raven/employee-assistant.ts`): the model can only call that tool —
+it never gets direct database access — and RavenDB itself decides when to run it and audits
+every call.
+
+This is **safe by design**, but it does need one piece of server-side configuration this repo
+can't provide for you: an **AI connection string** (an OpenAI/Azure OpenAI key registered on
+your RavenDB instance, via Studio → **AI Hub** → **Connection Strings**). Most people deploying
+this starter for the first time won't have that set up yet — that's expected, not a bug. If the
+connection string is missing, the chat shows a clear "AI Agents isn't configured on this
+instance" message instead of crashing.
+
+To enable it:
+
+1. In RavenDB Studio, go to **AI Hub → Connection Strings** and add one (e.g. OpenAI), following
+   the [AI Agents documentation](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview).
+2. If you named it something other than `OpenAI`, set `RAVEN_AI_CONNECTION_STRING_NAME` to match
+   (see `.env.example`).
+3. Open `/assistant` and ask a question — the agent (and its query tool) are created
+   automatically on first use.
+
 ## Get a RavenDB Cloud instance
 
 1. Create a free account at [cloud.ravendb.net](https://cloud.ravendb.net) and provision an
@@ -136,6 +163,7 @@ variables when prompted:
 | `RAVEN_DATABASE`             | Yes      | Database name, e.g. `Northwind`                                              |
 | `RAVEN_CERTIFICATE_BASE64`   | Yes\*    | Base64-encoded `.pfx` client certificate                                      |
 | `RAVEN_CERTIFICATE_PASSWORD` | No       | Certificate password, if you set one when generating it                       |
+| `RAVEN_AI_CONNECTION_STRING_NAME` | No   | Name of the AI connection string for the `/assistant` demo — see [AI Agents demo](#ai-agents-demo-optional). Defaults to `OpenAI` |
 
 \* Required for RavenDB Cloud (secured by default). Only omit `RAVEN_CERTIFICATE_BASE64` for an
 unsecured local `http://` RavenDB instance.
@@ -160,11 +188,12 @@ Open [http://localhost:3000](http://localhost:3000).
 ```
 src/
   app/                          Next.js App Router routes (UI)
-  components/                   Client search UI + presentational components
+    assistant/                  AI Agents chat page + server action
+  components/                   Client search/chat UI + presentational components
   server/
     domain/employee.ts          Employee type — no framework/DB code
-    application/                Use-cases the UI calls (listEmployees, searchEmployees, getEmployee)
-    infrastructure/raven/       DocumentStore singleton + RavenDB queries (the only place `ravendb` is imported)
+    application/                Use-cases the UI calls (listEmployees, searchEmployees, getEmployee, chatWithEmployees)
+    infrastructure/raven/       DocumentStore singleton, RavenDB queries and the AI Agent (the only place `ravendb` is imported)
 ```
 
 ## License

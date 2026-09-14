@@ -29,6 +29,7 @@ seed para rodar nem dados para importar. Clonou, fez deploy, conectou, pronto.
 - **Framework:** Next.js 16 (App Router) + TypeScript
 - **Banco de dados:** [RavenDB Cloud](https://ravendb.net/cloud) via cliente oficial [`ravendb`](https://www.npmjs.com/package/ravendb) do npm
 - **Busca:** full-text search nativa do RavenDB (auto-índices baseados em Lucene) — sem serviço de busca separado
+- **IA:** uma demonstração opcional de [AI Agents](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview) em chat (`/assistant`) — o framework de agentes nativo e auditável do RavenDB, não um serviço de orquestração de IA externo
 - **Hospedagem:** [Vercel](https://vercel.com), deploy em um clique
 
 ## Por que RavenDB + Next.js
@@ -98,6 +99,32 @@ Next.js e é reaproveitada entre invocações "quentes" da função serverless n
 própria orientação do RavenDB para [usar o RavenDB em aplicações
 serverless](https://ravendb.net/articles/using-ravendb-from-serverless-applications).
 
+### Demonstração de AI Agents (opcional)
+
+A página `/assistant` é um chat pequeno sobre os mesmos dados de `Employees`, respondido por um
+[**AI Agent**](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview)
+do RavenDB — um framework de agentes nativo do banco de dados, não um serviço de IA externo que
+você mesmo integra. O agente é configurado com uma única **query tool** somente leitura sobre a
+coleção `Employees` (`src/server/infrastructure/raven/employee-assistant.ts`): o modelo só pode
+chamar essa ferramenta — nunca tem acesso direto ao banco — e o próprio RavenDB decide quando
+executá-la e audita cada chamada.
+
+Isso é **seguro por desenho**, mas exige uma configuração do lado da infraestrutura que este
+repositório não pode fornecer por você: uma **AI connection string** (uma chave OpenAI/Azure
+OpenAI cadastrada na sua instância RavenDB, em Studio → **AI Hub** → **Connection Strings**). A
+maioria de quem sobe este starter pela primeira vez ainda não terá isso configurado — e isso é
+esperado, não um bug. Se a connection string estiver ausente, o chat mostra a mensagem "AI
+Agents não está configurado nesta instância" em vez de quebrar.
+
+Para habilitar:
+
+1. No RavenDB Studio, vá em **AI Hub → Connection Strings** e adicione uma (ex.: OpenAI),
+   seguindo a [documentação de AI Agents](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview).
+2. Se você deu um nome diferente de `OpenAI` a ela, defina `RAVEN_AI_CONNECTION_STRING_NAME`
+   com esse nome (veja `.env.example`).
+3. Abra `/assistant` e faça uma pergunta — o agente (e sua query tool) são criados
+   automaticamente no primeiro uso.
+
 ## Obtenha uma instância no RavenDB Cloud
 
 1. Crie uma conta gratuita em [cloud.ravendb.net](https://cloud.ravendb.net) e provisione uma
@@ -141,6 +168,7 @@ ambiente quando solicitado:
 | `RAVEN_DATABASE`               | Sim         | Nome do banco de dados, ex.: `Northwind`                                            |
 | `RAVEN_CERTIFICATE_BASE64`     | Sim\*       | Certificado de cliente `.pfx` codificado em base64                                   |
 | `RAVEN_CERTIFICATE_PASSWORD`   | Não         | Senha do certificado, se você definiu uma ao gerá-lo                                |
+| `RAVEN_AI_CONNECTION_STRING_NAME` | Não      | Nome da AI connection string usada pela demo `/assistant` — veja [Demonstração de AI Agents](#demonstração-de-ai-agents-opcional). Padrão: `OpenAI` |
 
 \* Obrigatória para o RavenDB Cloud (seguro por padrão). Só deixe `RAVEN_CERTIFICATE_BASE64`
 em branco para uma instância RavenDB local e não segura (`http://`).
@@ -165,11 +193,12 @@ Abra [http://localhost:3000](http://localhost:3000).
 ```
 src/
   app/                          Rotas do Next.js App Router (UI)
-  components/                   UI de busca (client) + componentes de apresentação
+    assistant/                  Página de chat do AI Agents + server action
+  components/                   UI de busca/chat (client) + componentes de apresentação
   server/
     domain/employee.ts          Tipo Employee — sem código de framework/banco
-    application/                Casos de uso chamados pela UI (listEmployees, searchEmployees, getEmployee)
-    infrastructure/raven/       DocumentStore singleton + queries do RavenDB (único lugar que importa `ravendb`)
+    application/                Casos de uso chamados pela UI (listEmployees, searchEmployees, getEmployee, chatWithEmployees)
+    infrastructure/raven/       DocumentStore singleton, queries do RavenDB e o AI Agent (único lugar que importa `ravendb`)
 ```
 
 ## Licença

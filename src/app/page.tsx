@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { EmployeeCard } from "@/components/EmployeeCard";
@@ -38,6 +39,9 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
           Backed by RavenDB&apos;s built-in <strong>Northwind</strong> sample dataset. Every
           search below runs natively in RavenDB — no Elasticsearch, Algolia, or other search
           service involved.
+        </p>
+        <p className={styles.subtitle}>
+          <Link href="/assistant">Try the RavenDB AI Agents chat →</Link>
         </p>
       </div>
 
