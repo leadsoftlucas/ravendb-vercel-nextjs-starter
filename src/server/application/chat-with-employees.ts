@@ -1,7 +1,11 @@
+import { isRavenConfigured } from "@/server/infrastructure/raven/document-store";
 import {
   askEmployeeAssistant,
   AssistantNotConfiguredError,
 } from "@/server/infrastructure/raven/employee-assistant";
+
+const MAX_QUESTION_LENGTH = 500;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type ChatWithEmployeesResult =
   | { ok: true; answer: string }
@@ -14,6 +18,22 @@ export async function chatWithEmployees(
   const trimmed = question.trim();
   if (!trimmed) {
     return { ok: false, reason: "error", message: "Ask a question first." };
+  }
+  if (trimmed.length > MAX_QUESTION_LENGTH) {
+    return { ok: false, reason: "error", message: "That question is too long. Keep it short." };
+  }
+  // The id comes from the browser; only accept the UUIDs our client generates so a caller
+  // cannot address arbitrary conversation documents.
+  if (!UUID_PATTERN.test(conversationId)) {
+    return { ok: false, reason: "error", message: "Invalid conversation." };
+  }
+  if (!isRavenConfigured()) {
+    return {
+      ok: false,
+      reason: "not-configured",
+      message:
+        "RavenDB isn't configured yet. Set RAVEN_URLS and RAVEN_DATABASE (see the README).",
+    };
   }
 
   try {
@@ -29,6 +49,7 @@ export async function chatWithEmployees(
           "\"AI Agents demo\" section to add an AI connection string.",
       };
     }
+    console.error("Employee assistant failed", error);
     return {
       ok: false,
       reason: "error",

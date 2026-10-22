@@ -9,7 +9,12 @@ type Params = Promise<{ id: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
-  const employee = await getEmployee(decodeURIComponent(id));
+  let employee;
+  try {
+    employee = await getEmployee(decodeURIComponent(id));
+  } catch {
+    return { title: "Employee directory" };
+  }
   if (!employee) return { title: "Employee not found" };
   return {
     title: `${fullName(employee)} — Employee directory`,

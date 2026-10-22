@@ -85,18 +85,14 @@ export class AssistantNotConfiguredError extends Error {
 }
 
 /**
- * Errors RavenDB raises when a database has no usable AI connection string (or the
- * configured provider rejects the request). There is no single dedicated exception for
+ * Errors RavenDB raises when a database has no usable AI connection string. Provider-side
+ * failures (quota, rejected request) are deliberately NOT treated as "not configured" so
+ * they surface as a generic error instead of a misleading setup hint. There is no single dedicated exception for
  * "connection string missing" in the client, so we treat this whole family — plus any
  * message mentioning a connection string — as "AI Agents isn't set up yet" rather than
  * a hard failure.
  */
-const NOT_CONFIGURED_ERROR_NAMES = new Set([
-  "AiException",
-  "ConfigurationException",
-  "UnsuccessfulAiRequestException",
-  "InsufficientQuotaException",
-]);
+const NOT_CONFIGURED_ERROR_NAMES = new Set(["AiException", "ConfigurationException"]);
 
 function isNotConfiguredError(error: unknown): boolean {
   if (!(error instanceof Error)) {

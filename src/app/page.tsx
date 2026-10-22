@@ -12,7 +12,19 @@ type SearchParams = Promise<{ q?: string }>;
 
 async function Results({ searchParams }: { searchParams: SearchParams }) {
   const { q = "" } = await searchParams;
-  const employees = await searchEmployees(q);
+  let employees;
+  try {
+    employees = await searchEmployees(q);
+  } catch (error) {
+    console.error("Employee search failed", error);
+    return (
+      <p className={styles.empty}>
+        Couldn&apos;t reach RavenDB. Check <code>RAVEN_URLS</code>,{" "}
+        <code>RAVEN_DATABASE</code> and the client certificate settings (see the README), and
+        that the <code>Northwind</code> sample data exists.
+      </p>
+    );
+  }
 
   if (employees.length === 0) {
     return <p className={styles.empty}>No employees matched &ldquo;{q}&rdquo;.</p>;
