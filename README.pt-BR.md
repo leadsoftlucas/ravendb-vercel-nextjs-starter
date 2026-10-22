@@ -7,13 +7,15 @@
 Starter Next.js totalmente integrado ao **RavenDB Cloud** — deploy na Vercel em um clique,
 com armazenamento de documentos e busca full-text nativa já embutidos.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fleadsoftlucas%2Fravendb-vercel-nextjs-starter&env=RAVEN_URLS,RAVEN_DATABASE,RAVEN_CERTIFICATE_BASE64,RAVEN_CERTIFICATE_PASSWORD&envDescription=RavenDB%20Cloud%20connection%20settings%20%E2%80%94%20see%20the%20README&envLink=https%3A%2F%2Fgithub.com%2Fleadsoftlucas%2Fravendb-vercel-nextjs-starter%232-get-a-ravendb-cloud-instance&project-name=ravendb-vercel-nextjs-starter&repository-name=ravendb-vercel-nextjs-starter)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fleadsoftlucas%2Fravendb-vercel-nextjs-starter&env=RAVEN_URLS,RAVEN_DATABASE,RAVEN_CERTIFICATE_BASE64,RAVEN_CERTIFICATE_PASSWORD&envDescription=RavenDB%20Cloud%20connection%20settings%20%E2%80%94%20see%20the%20README&envLink=https%3A%2F%2Fgithub.com%2Fleadsoftlucas%2Fravendb-vercel-nextjs-starter%23get-a-ravendb-cloud-instance&project-name=ravendb-vercel-nextjs-starter&repository-name=ravendb-vercel-nextjs-starter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![RavenDB](https://img.shields.io/badge/RavenDB-Cloud-b3131e)](https://ravendb.net/cloud)
 [![npm: ravendb](https://img.shields.io/npm/v/ravendb?label=ravendb)](https://www.npmjs.com/package/ravendb)
 
 </div>
+
+> **Projeto independente.** Este é um starter pessoal, no estilo comunidade, feito por um funcionário da RavenDB. **Não é um release oficial do RavenDB**, não tem suporte da RavenDB e **não está listado na galeria de templates da Vercel** — ele apenas usa o botão público "Deploy" da Vercel.
 
 ## O que é este repositório
 
@@ -29,7 +31,7 @@ seed para rodar nem dados para importar. Clonou, fez deploy, conectou, pronto.
 - **Framework:** Next.js 16 (App Router) + TypeScript
 - **Banco de dados:** [RavenDB Cloud](https://ravendb.net/cloud) via cliente oficial [`ravendb`](https://www.npmjs.com/package/ravendb) do npm
 - **Busca:** full-text search nativa do RavenDB (auto-índices baseados em Lucene) — sem serviço de busca separado
-- **IA:** uma demonstração opcional de [AI Agents](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview) em chat (`/assistant`) — o framework de agentes nativo e auditável do RavenDB, não um serviço de orquestração de IA externo
+- **IA:** uma demonstração opcional de [AI Agents](https://docs.ravendb.net/ai-integration/ai-agents/overview/) em chat (`/assistant`) — o framework de agentes nativo e auditável do RavenDB, não um serviço de orquestração de IA externo
 - **Hospedagem:** [Vercel](https://vercel.com), deploy em um clique
 
 ## Por que RavenDB + Next.js
@@ -63,8 +65,7 @@ Navegador ──▶ Next.js App Router (Server Components)
 - **`src/server/infrastructure/raven`** — o único lugar que importa `ravendb`. Mantém o `DocumentStore` compartilhado (singleton) e as queries do RavenDB.
 - **`src/app`** — rotas do Next.js (Server Components) e a UI de busca.
 
-Essa separação segue a organização em camadas que a **Vercel recomenda para apps Next.js**
-(manter acesso a dados fora dos componentes, isolar código server-only) e limites básicos de
+Essa separação mantém o acesso a dados fora dos componentes, isola o código server-only e segue limites básicos de
 **DDD** (o domínio não depende de infraestrutura; a infraestrutura é substituível por trás da
 camada de aplicação) — assim, o código específico do RavenDB fica concentrado em um só lugar,
 em vez de espalhado pela UI.
@@ -74,14 +75,18 @@ em vez de espalhado pela UI.
 ```ts
 // src/server/infrastructure/raven/employee-repository.ts
 const session = getDocumentStore().openSession();
-return session
-  .query<Employee>({ collection: "Employees" })
-  .search("Notes", term)
-  .search("Title", term)
-  .search("FirstName", term)
-  .search("LastName", term)
-  .take(limit)
-  .all();
+try {
+  return await session
+    .query<Employee>({ collection: "Employees" })
+    .search("Notes", term)
+    .search("Title", term)
+    .search("FirstName", term)
+    .search("LastName", term)
+    .take(limit)
+    .all();
+} finally {
+  session.dispose();
+}
 ```
 
 Chamadas sucessivas de `.search()` em campos diferentes são combinadas com **OR** pelo
@@ -102,24 +107,24 @@ serverless](https://ravendb.net/articles/using-ravendb-from-serverless-applicati
 ### Demonstração de AI Agents (opcional)
 
 A página `/assistant` é um chat pequeno sobre os mesmos dados de `Employees`, respondido por um
-[**AI Agent**](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview)
+[**AI Agent**](https://docs.ravendb.net/ai-integration/ai-agents/overview/)
 do RavenDB — um framework de agentes nativo do banco de dados, não um serviço de IA externo que
 você mesmo integra. O agente é configurado com uma única **query tool** somente leitura sobre a
 coleção `Employees` (`src/server/infrastructure/raven/employee-assistant.ts`): o modelo só pode
 chamar essa ferramenta — nunca tem acesso direto ao banco — e o próprio RavenDB decide quando
 executá-la e audita cada chamada.
 
-Isso é **seguro por desenho**, mas exige uma configuração do lado da infraestrutura que este
-repositório não pode fornecer por você: uma **AI connection string** (uma chave OpenAI/Azure
-OpenAI cadastrada na sua instância RavenDB, em Studio → **AI Hub** → **Connection Strings**). A
+Isso é **restrito por desenho**, mas exige uma configuração do lado da infraestrutura que este
+repositório não pode fornecer por você: uma **AI connection string** (por exemplo uma chave OpenAI
+cadastrada na sua instância RavenDB como AI connection string no RavenDB Studio — o nome dos
+menus varia conforme a versão, veja a [documentação de IA](https://docs.ravendb.net/ai-integration/connection-strings/overview/)). A
 maioria de quem sobe este starter pela primeira vez ainda não terá isso configurado — e isso é
 esperado, não um bug. Se a connection string estiver ausente, o chat mostra a mensagem "AI
 Agents não está configurado nesta instância" em vez de quebrar.
 
 Para habilitar:
 
-1. No RavenDB Studio, vá em **AI Hub → Connection Strings** e adicione uma (ex.: OpenAI),
-   seguindo a [documentação de AI Agents](https://ravendb.net/docs/article-page/latest/nodejs/ai-integration/ai-agents/overview).
+1. No RavenDB Studio, adicione uma AI connection string (ex.: OpenAI), seguindo a [documentação de AI Agents](https://docs.ravendb.net/ai-integration/ai-agents/overview/).
 2. Se você deu um nome diferente de `OpenAI` a ela, defina `RAVEN_AI_CONNECTION_STRING_NAME`
    com esse nome (veja `.env.example`).
 3. Abra `/assistant` e faça uma pergunta — o agente (e sua query tool) são criados
@@ -127,15 +132,17 @@ Para habilitar:
 
 ## Obtenha uma instância no RavenDB Cloud
 
-1. Crie uma conta gratuita em [cloud.ravendb.net](https://cloud.ravendb.net) e provisione uma
-   instância (o tier Free já é suficiente para este starter).
+1. Crie uma conta em [cloud.ravendb.net](https://cloud.ravendb.net) e provisione uma
+   instância. Veja os [preços do RavenDB Cloud](https://ravendb.net/products/cloud) para os tiers
+   disponíveis no momento — este starter só precisa de uma instância pequena.
 2. Abra o **RavenDB Studio** da sua instância, vá em **Settings → Create Sample Data** e
    gere o dataset **Northwind**. Isso cria a coleção `Employees` que este app lê.
-3. No portal do RavenDB Cloud, abra a aba **Products** da sua instância para encontrar a
-   **URL do cluster** e anote o **nome do banco de dados** (`Northwind`, a menos que você o
+3. No portal do RavenDB Cloud, abra a aba **Products** para encontrar a
+   **URL do cluster** da sua instância e anote o **nome do banco de dados** (`Northwind`, a menos que você o
    tenha renomeado).
-4. Instâncias do RavenDB Cloud são seguras (HTTPS + certificado) por padrão. No mesmo portal,
-   baixe o **certificado de cliente** (`.pfx`) da sua instância.
+4. Instâncias do RavenDB Cloud são seguras (HTTPS + certificado) por padrão. Na mesma aba
+   **Products**, baixe o **certificado de cliente** da sua instância (o arquivo `.pfx` é o que
+   este app usa).
 5. Converta o certificado para base64 — você vai colar essa string única na Vercel, não o
    arquivo em si:
 
@@ -164,7 +171,7 @@ ambiente quando solicitado:
 
 | Variável                      | Obrigatória | Descrição                                                                        |
 | ------------------------------ | ----------- | ----------------------------------------------------------------------------------- |
-| `RAVEN_URLS`                   | Sim         | URL(s) do cluster RavenDB Cloud, separadas por vírgula, ex.: `https://a.free.ravendb.cloud` |
+| `RAVEN_URLS`                   | Sim         | URL(s) do cluster RavenDB Cloud, separadas por vírgula, ex.: `https://a.minha-instancia.ravendb.cloud` |
 | `RAVEN_DATABASE`               | Sim         | Nome do banco de dados, ex.: `Northwind`                                            |
 | `RAVEN_CERTIFICATE_BASE64`     | Sim\*       | Certificado de cliente `.pfx` codificado em base64                                   |
 | `RAVEN_CERTIFICATE_PASSWORD`   | Não         | Senha do certificado, se você definiu uma ao gerá-lo                                |
@@ -206,6 +213,6 @@ src/
 [MIT](LICENSE) © 2026 [Lucas R. Tavares](https://github.com/leadsoftlucas)
 
 Este é um starter template independente e open-source, criado para demonstrar o **RavenDB** na
-**Vercel**. Não é um produto oficial do RavenDB; **RavenDB** e **RavenDB Cloud** são produtos da
+**Vercel**. Não é um produto oficial do RavenDB nem faz parte da galeria de templates da Vercel; **RavenDB** e **RavenDB Cloud** são produtos da
 [Hibernating Rhinos Ltd.](https://ravendb.net) — consulte o site oficial para o licenciamento
 do banco de dados em si.
