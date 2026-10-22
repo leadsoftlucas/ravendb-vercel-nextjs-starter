@@ -45,8 +45,11 @@ export async function chatWithEmployees(
         ok: false,
         reason: "not-configured",
         message:
-          "AI Agents isn't configured on this RavenDB instance yet — see the README's " +
-          "\"AI Agents demo\" section to add an AI connection string.",
+          error.kind === "license"
+            ? "This RavenDB instance's license doesn't include AI Agents — see the README's " +
+              "\"AI Agents demo\" section."
+            : "AI Agents isn't configured on this RavenDB instance yet — see the README's " +
+              "\"AI Agents demo\" section to add an AI connection string.",
       };
     }
     console.error("Employee assistant failed", error);

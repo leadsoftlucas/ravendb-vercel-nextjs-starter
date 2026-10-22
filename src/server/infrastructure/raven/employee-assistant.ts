@@ -33,8 +33,10 @@ async function ensureAgent(): Promise<void> {
   if (!agentReady) {
     agentReady = (async () => {
       const store = getDocumentStore();
-      const existing = await store.ai.getAgent(AGENT_ID);
-      if (existing) {
+      // `getAgent(id)` throws a RavenException ("AI Agent ... doesn't exists") when the agent
+      // has not been created yet, so list the agents instead and look for ours.
+      const { aiAgents } = await store.ai.getAgents();
+      if (aiAgents?.some((agent) => agent.identifier === AGENT_ID)) {
         return;
       }
 
@@ -44,7 +46,10 @@ async function ensureAgent(): Promise<void> {
           name: "Employees Assistant",
           connectionStringName: connectionStringName(),
           systemPrompt: SYSTEM_PROMPT,
-          sampleObject: "",
+          // The client only serializes `sampleObject` from the configuration itself (the second
+          // argument of `createAgent` is not forwarded), and it must be non-empty. This is the
+          // shape of the free-form answer this app asks for (see `run({ noSchema: true })`).
+          sampleObject: JSON.stringify({ answer: "Laura Callahan is the Inside Sales Coordinator." }),
           queries: [
             {
               name: "search_employees",
@@ -62,10 +67,7 @@ async function ensureAgent(): Promise<void> {
               options: { allowModelQueries: true },
             },
           ],
-        },
-        // Sample output shape for the free-form fallback answer this app actually asks for
-        // (see `run({ noSchema: true })` below) — required so the agent has a schema on file.
-        { answer: "Laura Callahan is the Inside Sales Coordinator." }
+        }
       );
     })().catch((error: unknown) => {
       agentReady = undefined;
@@ -77,9 +79,17 @@ async function ensureAgent(): Promise<void> {
 }
 
 export class AssistantNotConfiguredError extends Error {
-  constructor(cause: unknown) {
-    super("RavenDB AI Agents is not configured on this instance (no AI connection string).");
+  /** `license` = the server's license doesn't include AI Agents; `connection-string` otherwise. */
+  readonly kind: "license" | "connection-string";
+
+  constructor(cause: unknown, kind: "license" | "connection-string" = "connection-string") {
+    super(
+      kind === "license"
+        ? "This RavenDB instance's license does not include the AI Agents feature."
+        : "RavenDB AI Agents is not configured on this instance (no AI connection string)."
+    );
     this.name = "AssistantNotConfiguredError";
+    this.kind = kind;
     this.cause = cause;
   }
 }
@@ -115,6 +125,9 @@ export async function askEmployeeAssistant(
     const { answer } = await chat.run({ noSchema: true });
     return answer ?? "";
   } catch (error) {
+    if (error instanceof Error && error.name === "LicenseLimitException") {
+      throw new AssistantNotConfiguredError(error, "license");
+    }
     if (isNotConfiguredError(error)) {
       throw new AssistantNotConfiguredError(error);
     }
