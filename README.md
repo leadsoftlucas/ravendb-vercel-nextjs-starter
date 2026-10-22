@@ -118,6 +118,10 @@ this starter for the first time won't have that set up yet — that's expected, 
 connection string is missing, the chat shows a clear "AI Agents isn't configured on this
 instance" message instead of crashing.
 
+The feature also requires a RavenDB **license that includes AI Agents**. A server without one
+(e.g. a plain unlicensed Docker image, tested on RavenDB 7.2.2) rejects the agent setup, and the
+chat shows a "license doesn't include AI Agents" message instead of an error.
+
 To enable it:
 
 1. In RavenDB Studio, add an AI connection string (e.g. OpenAI), following

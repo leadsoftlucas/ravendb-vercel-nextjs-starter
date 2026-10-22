@@ -122,6 +122,10 @@ maioria de quem sobe este starter pela primeira vez ainda não terá isso config
 esperado, não um bug. Se a connection string estiver ausente, o chat mostra a mensagem "AI
 Agents não está configurado nesta instância" em vez de quebrar.
 
+O recurso também exige uma **licença do RavenDB que inclua AI Agents**. Um servidor sem ela
+(por exemplo, uma imagem Docker sem licença, testado no RavenDB 7.2.2) recusa a criação do
+agente, e o chat mostra a mensagem "a licença não inclui AI Agents" em vez de um erro.
+
 Para habilitar:
 
 1. No RavenDB Studio, adicione uma AI connection string (ex.: OpenAI), seguindo a [documentação de AI Agents](https://docs.ravendb.net/ai-integration/ai-agents/overview/).
