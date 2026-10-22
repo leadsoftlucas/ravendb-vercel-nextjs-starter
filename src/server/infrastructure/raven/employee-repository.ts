@@ -12,11 +12,15 @@ const COLLECTION = "Employees";
 export const employeeRepository = {
   async findAll(limit = 25): Promise<Employee[]> {
     const session = getDocumentStore().openSession();
-    return session
-      .query<Employee>({ collection: COLLECTION })
-      .orderBy("LastName")
-      .take(limit)
-      .all();
+    try {
+      return await session
+        .query<Employee>({ collection: COLLECTION })
+        .orderBy("LastName")
+        .take(limit)
+        .all();
+    } finally {
+      session.dispose();
+    }
   },
 
   async findById(id: string): Promise<Employee | null> {
@@ -38,13 +42,17 @@ export const employeeRepository = {
    */
   async search(term: string, limit = 25): Promise<Employee[]> {
     const session = getDocumentStore().openSession();
-    return session
-      .query<Employee>({ collection: COLLECTION })
-      .search("Notes", term)
-      .search("Title", term)
-      .search("FirstName", term)
-      .search("LastName", term)
-      .take(limit)
-      .all();
+    try {
+      return await session
+        .query<Employee>({ collection: COLLECTION })
+        .search("Notes", term)
+        .search("Title", term)
+        .search("FirstName", term)
+        .search("LastName", term)
+        .take(limit)
+        .all();
+    } finally {
+      session.dispose();
+    }
   },
 };
