@@ -21,7 +21,11 @@ export const employeeRepository = {
 
   async findById(id: string): Promise<Employee | null> {
     const session = getDocumentStore().openSession();
-    return session.load<Employee>(id);
+    try {
+      return await session.load<Employee>(id);
+    } finally {
+      session.dispose();
+    }
   },
 
   /**

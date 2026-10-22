@@ -50,6 +50,10 @@ function createDocumentStore(): DocumentStore {
   const store = authOptions
     ? new DocumentStore(urls, database, authOptions)
     : new DocumentStore(urls, database);
+  // Northwind documents expose their id as `Id` in our domain type; the client's
+  // default identity property is lower-case `id`, which would leave `Employee.Id`
+  // undefined (broken links / React keys).
+  store.conventions.identityProperty = "Id";
   store.initialize();
   return store;
 }
