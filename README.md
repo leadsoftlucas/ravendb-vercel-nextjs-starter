@@ -194,6 +194,12 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+**Without RavenDB Cloud:** point `RAVEN_URLS` at an unsecured local server (e.g. `http://localhost:8080`),
+leave both certificate variables empty, and load the Northwind sample data in Studio. If
+your secured server uses a self-signed certificate, Node must trust it:
+`NODE_EXTRA_CA_CERTS=/path/to/ca.pem npm run dev`. A password-protected `.pfx` needs
+`RAVEN_CERTIFICATE_PASSWORD`; a `.pfx` without a password works with that variable unset.
+
 ## Project structure
 
 ```
