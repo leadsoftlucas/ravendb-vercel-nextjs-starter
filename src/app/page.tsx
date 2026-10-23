@@ -79,7 +79,7 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
         </a>{" "}
         Node.js client on Next.js App Router. See{" "}
         <a
-          href="https://github.com/leadsoftlucas/ravendb-vercel-nextjs-starter"
+          href="https://github.com/ravendb/ravendb-vercel-nextjs-starter"
           target="_blank"
           rel="noreferrer"
         >

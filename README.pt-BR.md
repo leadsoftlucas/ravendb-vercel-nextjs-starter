@@ -7,7 +7,7 @@
 Starter Next.js totalmente integrado ao **RavenDB Cloud** — deploy na Vercel em um clique,
 com armazenamento de documentos e busca full-text nativa já embutidos.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fleadsoftlucas%2Fravendb-vercel-nextjs-starter&env=RAVEN_URLS,RAVEN_DATABASE,RAVEN_CERTIFICATE_BASE64,RAVEN_CERTIFICATE_PASSWORD&envDescription=RavenDB%20Cloud%20connection%20settings%20%E2%80%94%20see%20the%20README&envLink=https%3A%2F%2Fgithub.com%2Fleadsoftlucas%2Fravendb-vercel-nextjs-starter%23get-a-ravendb-cloud-instance&project-name=ravendb-vercel-nextjs-starter&repository-name=ravendb-vercel-nextjs-starter)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fravendb%2Fravendb-vercel-nextjs-starter&env=RAVEN_URLS,RAVEN_DATABASE,RAVEN_CERTIFICATE_BASE64,RAVEN_CERTIFICATE_PASSWORD&envDescription=RavenDB%20Cloud%20connection%20settings%20%E2%80%94%20see%20the%20README&envLink=https%3A%2F%2Fgithub.com%2Fravendb%2Fravendb-vercel-nextjs-starter%23get-a-ravendb-cloud-instance&project-name=ravendb-vercel-nextjs-starter&repository-name=ravendb-vercel-nextjs-starter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![RavenDB](https://img.shields.io/badge/RavenDB-Cloud-b3131e)](https://ravendb.net/cloud)
@@ -15,7 +15,9 @@ com armazenamento de documentos e busca full-text nativa já embutidos.
 
 </div>
 
-> **Projeto independente.** Este é um starter pessoal, no estilo comunidade, feito por um funcionário da RavenDB. **Não é um release oficial do RavenDB**, não tem suporte da RavenDB e **não está listado na galeria de templates da Vercel** — ele apenas usa o botão público "Deploy" da Vercel.
+> **Mantido pela RavenDB.** Criado originalmente por [Lucas R. Tavares](https://github.com/leadsoftlucas) (Sales Engineer / Solution Architect). Experimental: em revisão pela Engenharia; ainda sem cobertura de suporte oficial.
+>
+> Ainda não está listado na galeria de templates da Vercel (ainda não houve submissão; a Vercel revisa cada submissão); ele apenas usa o botão público "Deploy" da Vercel.
 
 ## O que é este repositório
 
@@ -190,7 +192,7 @@ segredos.
 ## Rodando localmente
 
 ```bash
-git clone https://github.com/leadsoftlucas/ravendb-vercel-nextjs-starter.git
+git clone https://github.com/ravendb/ravendb-vercel-nextjs-starter.git
 cd ravendb-vercel-nextjs-starter
 npm install
 cp .env.example .env.local   # depois preencha com os dados da sua instância RavenDB Cloud
@@ -218,11 +220,14 @@ src/
     infrastructure/raven/       DocumentStore singleton, queries do RavenDB e o AI Agent (único lugar que importa `ravendb`)
 ```
 
+## Procedência
+
+Criado por [Lucas R. Tavares](https://github.com/leadsoftlucas) em `github.com/leadsoftlucas/ravendb-vercel-nextjs-starter` e transferido para a organização RavenDB em outubro de 2026, com histórico e autoria preservados. Licença MIT; os direitos autorais pertencem à RavenDB.
+
 ## Licença
 
-[MIT](LICENSE) © 2026 [Lucas R. Tavares](https://github.com/leadsoftlucas)
+[MIT](LICENSE) © 2026 RavenDB
 
-Este é um starter template independente e open-source, criado para demonstrar o **RavenDB** na
-**Vercel**. Não é um produto oficial do RavenDB nem faz parte da galeria de templates da Vercel; **RavenDB** e **RavenDB Cloud** são produtos da
+**Mantido pela RavenDB.** Experimental: em revisão pela Engenharia; ainda sem cobertura de suporte oficial. Ainda não está listado na galeria de templates da Vercel (ainda não houve submissão; a Vercel revisa cada submissão). **RavenDB** e **RavenDB Cloud** são produtos da
 [Hibernating Rhinos Ltd.](https://ravendb.net) — consulte o site oficial para o licenciamento
 do banco de dados em si.
